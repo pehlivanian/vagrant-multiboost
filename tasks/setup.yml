@@ -1,0 +1,45 @@
+- name: Ensure group 'developers' exists
+  group:
+    name: developers
+    state: present
+
+- name: Create the user 'charles'
+  user:
+    name: charles
+    shell: /bin/bash
+    password: $6$y3nWSpGhmNuneUsA$Xqvx9Ey7iZz8OUF0Qid4q0e75nX/.JptamlURraUG3JCdWHiUQ1x5sicH0sdGNfR6DWVfA5DJREj45NQ0rAFX/
+
+- name: Assign 'charles' to the 'developers' group
+  user:
+    name: charles
+    groups: developers
+    append: yes
+
+- name: Create a directory 'multiboost'
+  file:
+    path: /opt/multiboost
+    state: directory
+    mode: 0750
+    group: developers
+
+- name: Create a directory 'eigen'
+  file:
+    path: /opt/eigen
+    state: directory
+    mode: 0750
+    group: developers
+
+- name: Clone Multipboost repo in 'multiboost'
+  git:
+    repo: 'https://github.com/pehlivanian/MultiBoost.git'
+    dest: /opt/multiboost
+
+- name: Clone eigen repo in 'eigen'
+  ansible.builtin.git:
+    repo: 'https://gitlab.com/libeigen/eigen.git'
+    dest: /opt/eigen
+
+- name: apt-install components
+  ansible.builtin.apt:
+    name:
+      - python3-pip

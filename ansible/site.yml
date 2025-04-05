@@ -1,0 +1,8 @@
+---
+- name: Provision MultiBoost
+  hosts: all
+  become: yes
+  become_method: sudo
+  remote_user: ubuntu
+  tasks:
+    - import_tasks: ../tasks/setup.yml
