@@ -1,0 +1,2 @@
+# vagrant-multiboost
+vagrant-multiboost
