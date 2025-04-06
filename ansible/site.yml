@@ -4,5 +4,285 @@
   become: yes
   become_method: sudo
   remote_user: ubuntu
+
   tasks:
-    - import_tasks: ../tasks/setup.yml
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name: 
+          - cmake
+          - clang
+          - build-essential
+          - libboost-all-dev
+          - liblapack-dev
+          - libblas-dev
+          - libopenblas-dev
+          - git
+          - doxygen # For mlpack documentation
+        state: present
+
+    - name: Ensure group 'developers' exists
+      group:
+        name: developers
+        state: present
+
+    - name: Create the user 'charles'
+      user:
+        name: charles
+        shell: /bin/bash
+        password: $6$y3nWSpGhmNuneUsA$Xqvx9Ey7iZz8OUF0Qid4q0e75nX/.JptamlURraUG3JCdWHiUQ1x5sicH0sdGNfR6DWVfA5DJREj45NQ0rAFX/
+
+    - name: Assign 'charles' to the 'developers' group
+      user:
+        name: charles
+        groups: developers
+        append: yes
+
+    - name: Create a directory 'multiboost'
+      file:
+        path: /opt/multiboost
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Create a directory 'eigen'
+      file:
+        path: /opt/eigen
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Create a directory 'armadillo'
+      file:
+        path: /opt/armadillo
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Create a directory 'googletest'
+      file:
+        path: /opt/googletest
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Create a directory 'benchmark'
+      file:
+        path: /opt/benchmark
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Create a directory 'mlpack'
+      file:
+        path: /opt/mlpack
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Create a directory 'ensmallen'
+      file:
+        path: /opt/ensmallen
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Create a directory 'cereal'
+      file:
+        path: /opt/cereal
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Clone Multiboost repo in 'multiboost'
+      git:
+        repo: 'https://github.com/pehlivanian/MultiBoost.git'
+        dest: /opt/multiboost
+
+    - name: Clone eigen repo in 'eigen'
+      ansible.builtin.git:
+        repo: 'https://gitlab.com/libeigen/eigen.git'
+        dest: /opt/eigen
+
+    - name: Clone Google Test repo in 'googletest'
+      git:
+        repo: 'https://github.com/google/googletest.git'
+        dest: /opt/googletest
+        version: 'release-1.12.1'
+
+    - name: Clone Google Benchmark repo in 'benchmark'
+      git:
+        repo: 'https://github.com/google/benchmark.git'
+        dest: /opt/benchmark
+
+    - name: Clone mlpack repo in 'mlpack'
+      git:
+        repo: 'https://github.com/mlpack/mlpack.git'
+        dest: /opt/mlpack
+
+    - name: Clone cereal repo in 'cereal'
+      git:
+        repo: 'https://github.com/USCiLab/cereal.git'
+        dest: /opt/cereal
+
+    - name: Create build directory for Eigen
+      file:
+        path: /opt/eigen/build
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Build and install Eigen
+      command: "{{ item }}"
+      args:
+        chdir: /opt/eigen/build
+        creates: /usr/local/include/eigen3
+      with_items:
+        - cmake ..
+        - make install
+
+    - name: Download Armadillo
+      get_url:
+        url: https://sourceforge.net/projects/arma/files/armadillo-12.6.7.tar.xz
+        dest: /opt/armadillo/armadillo.tar.xz
+        mode: '0644'
+        timeout: 60
+      
+    - name: Extract Armadillo
+      unarchive:
+        src: /opt/armadillo/armadillo.tar.xz
+        dest: /opt/armadillo
+        remote_src: yes
+        creates: /opt/armadillo/armadillo-12.6.7
+
+    - name: Create build directory for Armadillo
+      file:
+        path: /opt/armadillo/armadillo-12.6.7/build
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Build and install Armadillo
+      command: "{{ item }}"
+      args:
+        chdir: /opt/armadillo/armadillo-12.6.7/build
+        creates: /usr/local/include/armadillo
+      with_items:
+        - cmake ..
+        - make
+        - make install
+
+    - name: Create build directory for Google Test
+      file:
+        path: /opt/googletest/build
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Build and install Google Test
+      command: "{{ item }}"
+      args:
+        chdir: /opt/googletest/build
+        creates: /usr/local/include/gtest
+      with_items:
+        - cmake ..
+        - make
+        - make install
+
+    - name: Create build directory for Google Benchmark
+      file:
+        path: /opt/benchmark/build
+        state: directory
+        mode: 0750
+        group: developers
+        
+    - name: Build and install Google Benchmark
+      command: "{{ item }}"
+      args:
+        chdir: /opt/benchmark/build
+        creates: /usr/local/include/benchmark
+      with_items:
+        - cmake -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_GTEST_TESTS=OFF ..
+        - make
+        - make install
+
+    - name: Download Ensmallen
+      get_url:
+        url: https://ensmallen.org/files/ensmallen-2.22.1.tar.gz
+        dest: /opt/ensmallen/ensmallen-2.22.1.tar.gz
+        mode: '0644'
+        timeout: 60
+
+    - name: Extract Ensmallen
+      unarchive:
+        src: /opt/ensmallen/ensmallen-2.22.1.tar.gz
+        dest: /opt/ensmallen
+        remote_src: yes
+        creates: /opt/ensmallen/ensmallen-2.22.1
+
+    - name: Create build directory for Ensmallen
+      file:
+        path: /opt/ensmallen/ensmallen-2.22.1/build
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Build and install Ensmallen
+      command: "{{ item }}"
+      args:
+        chdir: /opt/ensmallen/ensmallen-2.22.1/build
+        creates: /usr/local/include/ensmallen.hpp
+      with_items:
+        - cmake ..
+        - make install
+
+    - name: Create build directory for cereal
+      file:
+        path: /opt/cereal/build
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Build and install cereal
+      command: "{{ item }}"
+      args:
+        chdir: /opt/cereal/build
+        creates: /usr/local/include/cereal
+      with_items:
+        - cmake -DJUST_INSTALL_CEREAL=ON ..
+        - make install
+
+    - name: Create build directory for mlpack
+      file:
+        path: /opt/mlpack/build
+        state: directory
+        mode: 0750
+        group: developers
+
+    - name: Build and install mlpack
+      command: "{{ item }}"
+      args:
+        chdir: /opt/mlpack/build
+        creates: /usr/local/include/mlpack
+      with_items:
+        - cmake -DBUILD_TESTS=OFF -DBUILD_CLI_EXECUTABLES=OFF -DBUILD_PYTHON_BINDINGS=OFF -DBUILD_JULIA_BINDINGS=OFF -DBUILD_GO_BINDINGS=OFF -DBUILD_R_BINDINGS=OFF ..
+        - make
+        - make install
+        
+    - name: Set group ownership for /opt directory and subdirectories
+      file:
+        path: /opt
+        state: directory
+        group: developers
+        recurse: yes
+        
+    - name: Set write permissions for group on /opt directory and subdirectories
+      file:
+        path: /opt
+        state: directory
+        mode: "g+w"
+        recurse: yes
