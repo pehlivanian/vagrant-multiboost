@@ -286,3 +286,43 @@
         state: directory
         mode: "g+w"
         recurse: yes
+    
+    - name: Create test data directory
+      file:
+        path: /opt/data
+        state: directory
+        mode: 0755
+        group: developers
+    
+    - name: Create Regression subdirectory within test data directory
+      file:
+        path: /opt/data/Regression
+        state: directory
+        mode: 0755
+        group: developers
+
+    - name: Copy test data files for classification
+      copy:
+        src: "{{ item }}"
+        dest: /opt/data/
+        mode: 0644
+        group: developers
+      with_items:
+        - /home/charles/Data/sonar_X.csv
+        - /home/charles/Data/sonar_y.csv
+    
+    - name: Copy test data files for regression
+      copy:
+        src: "{{ item }}"
+        dest: /opt/data/Regression/
+        mode: 0644
+        group: developers
+      with_items:
+        - /home/charles/Data/Regression/1193_BNG_lowbwt_X.csv
+        - /home/charles/Data/Regression/1193_BNG_lowbwt_y.csv
+    
+    - name: Update data file paths in source files
+      shell: find /opt/multiboost -type f -name "*.cpp" -o -name "*.hpp" -o -name "*.sh" | xargs sed -i 's|/home/charles/Data|/opt/data|g'
+
+    - name: Update source file paths in source files
+      shell: find /opt/multiboost -type f -name "*.cpp" -o -name "*.hpp" -o -name "*.sh" | xargs sed -i 's|/home/charles/src/C++/sandbox/Inductive-Boost|/opt/multiboost|g'
