@@ -310,6 +310,10 @@
       with_items:
         - /home/charles/Data/sonar_X.csv
         - /home/charles/Data/sonar_y.csv
+        - /home/charles/Data/buggyCrx_train_X.csv
+        - /home/charles/Data/buggyCrx_train_y.csv
+        - /home/charles/Data/buggyCrx_test_X.csv
+        - /home/charles/Data/buggyCrx_test_y.csv
     
     - name: Copy test data files for regression
       copy:
@@ -320,7 +324,11 @@
       with_items:
         - /home/charles/Data/Regression/1193_BNG_lowbwt_X.csv
         - /home/charles/Data/Regression/1193_BNG_lowbwt_y.csv
-    
+        - /home/charles/Data/Regression/606_fri_c2_1000_10_train_X.csv
+        - /home/charles/Data/Regression/606_fri_c2_1000_10_train_y.csv
+        - /home/charles/Data/Regression/606_fri_c2_1000_10_test_X.csv
+        - /home/charles/Data/Regression/606_fri_c2_1000_10_test_y.csv
+
     - name: Update data file paths in source files
       shell: find /opt/multiboost -type f -name "*.cpp" -o -name "*.hpp" -o -name "*.sh" | xargs sed -i 's|/home/charles/Data|/opt/data|g'
 
