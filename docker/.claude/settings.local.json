@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(git -C /home/charles/src/devops/sandbox/MultiBoost log --oneline --grep=\"incremental\" --all)",
+      "Bash(git -C /home/charles/src/devops/sandbox/MultiBoost log --oneline --all)",
+      "Bash(git -C /home/charles/src/devops/sandbox/MultiBoost log --oneline --all --name-only)",
+      "Bash(cp:*)"
+    ],
+    "deny": []
+  },
+  "enableAllProjectMcpServers": false
+}
