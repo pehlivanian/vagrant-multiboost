@@ -1,8 +1,8 @@
 {
   "x": {
-    "traindataname": "Regression/boston_train",
-    "testdataname": "Regression/boston_test",
-    "steps": 127,
+    "traindataname": "Regression/synthetic_train",
+    "testdataname": "Regression/synthetic_test",
+    "steps": 20,
     "recursiveFit": true,
     "useWeights": false,
     "rowSubsampleRatio": 1.0,
