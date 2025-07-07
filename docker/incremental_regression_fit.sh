@@ -246,6 +246,15 @@ else
             *";"*)
                 semicolon_line="$line"
                 ;;
+            *"IS R^2:"*)
+                # Extract and display IS R² value using shell parameter expansion
+                temp_line="${line#*IS R^2: }"
+                is_r2="${temp_line% *}"
+                if [ -z "$is_r2" ]; then
+                    is_r2="$temp_line"
+                fi
+                echo "${PREFIX} IS: (r_squared): ($is_r2)"
+                ;;
         esac
     done <<< "$STEP_INFO"
     
@@ -314,13 +323,25 @@ for (( ; ; ));
       # Quiet mode - direct output is the index name
       INDEX_NAME_STEP=$STEP_INFO
   else
-      # Verbose mode - extract index name from multi-line output
-      # Look for the last line (which should be the index name)
+      # Verbose mode - extract index name and display IS R² values
       INDEX_NAME_STEP=""
       while IFS= read -r line; do
-          if [ -n "$line" ]; then
-              INDEX_NAME_STEP="$line"
-          fi
+          case "$line" in
+              *"IS R^2:"*)
+                  # Extract and display IS R² value using shell parameter expansion
+                  temp_line="${line#*IS R^2: }"
+                  is_r2="${temp_line% *}"
+                  if [ -z "$is_r2" ]; then
+                      is_r2="$temp_line"
+                  fi
+                  echo "${PREFIX} IS: (r_squared): ($is_r2)"
+                  ;;
+              *)
+                  if [ -n "$line" ]; then
+                      INDEX_NAME_STEP="$line"
+                  fi
+                  ;;
+          esac
       done <<< "$STEP_INFO"
   fi
 
